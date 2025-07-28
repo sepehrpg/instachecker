@@ -54,12 +54,12 @@ import com.example.database.model.UserEntity
 import com.sepehrpg.scaninsta.designsystem.component.AppCustomSearchBarBasicTextField
 import com.sepehrpg.scaninsta.designsystem.component.AppExtendedFloatingActionButton
 import com.sepehrpg.scaninsta.designsystem.theme.AppTheme
-import com.sepehrpg.scaninsta.di.ViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainActivityViewModel by viewModels {
-        ViewModelFactory(application)
-    }
+    private val viewModel: MainActivityViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun AppMainScreen(viewModel: MainActivityViewModel) {
 

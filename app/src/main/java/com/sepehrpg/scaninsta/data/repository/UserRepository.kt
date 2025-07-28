@@ -9,8 +9,10 @@ import com.sepehrpg.scaninsta.data.model.InstagramUserData
 import com.sepehrpg.scaninsta.data.model.InstagramUserInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
-class UserRepository(private val userDao: UserDao) {
+
+class UserRepository @Inject constructor (private val userDao: UserDao) {
 
     private val json = Json { ignoreUnknownKeys = true }
 

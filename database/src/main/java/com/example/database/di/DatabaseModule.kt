@@ -1,5 +1,5 @@
-/*
 package com.example.database.di
+
 import android.content.Context
 import androidx.room.Room
 import com.example.database.RoomDb
@@ -15,12 +15,13 @@ import javax.inject.Singleton
 internal object DatabaseModule {
     @Provides
     @Singleton
-    fun providesNiaDatabase(
+    fun providesDatabase(
         @ApplicationContext context: Context,
     ): RoomDb = Room.databaseBuilder(
         context,
         RoomDb::class.java,
-        "app_room_db",
+        "app_database",
     ).build()
 }
-*/
+
+

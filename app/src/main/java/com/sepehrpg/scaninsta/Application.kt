@@ -1,10 +1,7 @@
 package com.sepehrpg.scaninsta
-
 import android.app.Application
-import com.example.database.AppDatabase
-import com.sepehrpg.scaninsta.data.repository.UserRepository
+import dagger.hilt.android.HiltAndroidApp
 
-class Application : Application() {
-    private val database by lazy { AppDatabase.getDatabase(this) }
-    val repository by lazy { UserRepository(database.userDao()) }
-}
+
+@HiltAndroidApp
+class Application : Application()

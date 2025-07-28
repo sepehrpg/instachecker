@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-
 enum class UserType {
     FOLLOWER,
     FOLLOWING,

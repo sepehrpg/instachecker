@@ -11,11 +11,13 @@ import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.zip.ZipInputStream
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.example.database.model.UserEntity
 import com.sepehrpg.scaninsta.data.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 
 sealed class MainActivtyUiState {
@@ -25,19 +27,16 @@ sealed class MainActivtyUiState {
     data class Error(val message: String) : MainActivtyUiState()
 }
 
-class MainActivityViewModel(application: android.app.Application) : AndroidViewModel(application) {
-
-    private val repository: UserRepository
+@HiltViewModel
+class MainActivityViewModel @Inject constructor(
+   private val repository: UserRepository
+) : ViewModel() {
 
     val unfollowers: StateFlow<List<UserEntity>>
-
     private val _uiState = MutableStateFlow<MainActivtyUiState>(MainActivtyUiState.Idle)
     val uiState: StateFlow<MainActivtyUiState> = _uiState
 
     init {
-        val app = getApplication<Application>()
-        repository = app.repository
-
         unfollowers = repository.unfollowers.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

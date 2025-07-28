@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ac9d909d19d6480fbe1002e315dbad2a",
+    "identityHash": "30645b5e203dd37fc3db401e81677d17",
     "entities": [
       {
-        "tableName": "non_followers",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `href` TEXT, `value` TEXT, `timestamp` INTEGER, `isUnfollow` INTEGER NOT NULL)",
+        "tableName": "users",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT NOT NULL, `href` TEXT NOT NULL, `userType` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -15,27 +15,21 @@
             "notNull": true
           },
           {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "href",
             "columnName": "href",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
-            "fieldPath": "value",
-            "columnName": "value",
+            "fieldPath": "userType",
+            "columnName": "userType",
             "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "isUnfollow",
-            "columnName": "isUnfollow",
-            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -44,15 +38,12 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       }
     ],
-    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac9d909d19d6480fbe1002e315dbad2a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '30645b5e203dd37fc3db401e81677d17')"
     ]
   }
 }

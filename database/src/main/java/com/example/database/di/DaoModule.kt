@@ -1,9 +1,6 @@
-/*
-
 package com.example.database.di
-
 import com.example.database.RoomDb
-import com.example.database.dao.NonFollowersDao
+import com.example.database.dao.UserDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,9 +10,7 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 internal object DaoModule {
     @Provides
-    fun providesArticlesDao(
+    fun providesUserDao(
         database: RoomDb,
-    ): NonFollowersDao = database.nonFollowersDao()
-
+    ): UserDao = database.userDao()
 }
-*/
