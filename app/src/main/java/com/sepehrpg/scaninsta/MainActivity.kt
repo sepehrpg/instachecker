@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
@@ -93,7 +92,7 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
     Scaffold(
         containerColor = Color.White,
         floatingActionButton = {
-            if (uiState is MainActivtyUiState.Success){
+            if (uiState is MainActivityUiState.Success){
                 AppExtendedFloatingActionButton(
                     onClick = { viewModel.resetState() },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
@@ -102,7 +101,7 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
             }
         },
         topBar = {
-            if (uiState is MainActivtyUiState.Success){
+            if (uiState is MainActivityUiState.Success){
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -124,10 +123,10 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
         ) {
             AnimatedContent(targetState = uiState, label = "State Animation") { state ->
                 when (state) {
-                    is MainActivtyUiState.Idle -> IdleScreen { filePickerLauncher.launch("application/zip") }
-                    is MainActivtyUiState.Loading -> LoadingScreen()
-                    is MainActivtyUiState.Success -> ResultScreen(unfollowers = unfollowers)
-                    is MainActivtyUiState.Error -> ErrorScreen(
+                    is MainActivityUiState.Idle -> IdleScreen { filePickerLauncher.launch("application/zip") }
+                    is MainActivityUiState.Loading -> LoadingScreen()
+                    is MainActivityUiState.Success -> ResultScreen(unfollowers = unfollowers)
+                    is MainActivityUiState.Error -> ErrorScreen(
                         message = state.message,
                         onRetry = { viewModel.resetState() }
                     )

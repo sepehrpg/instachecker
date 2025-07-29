@@ -1,5 +1,4 @@
 package com.sepehrpg.scaninsta
-
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -20,11 +19,11 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 
-sealed class MainActivtyUiState {
-    object Idle : MainActivtyUiState()
-    object Loading : MainActivtyUiState()
-    object Success : MainActivtyUiState()
-    data class Error(val message: String) : MainActivtyUiState()
+sealed class MainActivityUiState {
+    data object Idle : MainActivityUiState()
+    data object Loading : MainActivityUiState()
+    data object Success : MainActivityUiState()
+    data class Error(val message: String) : MainActivityUiState()
 }
 
 @HiltViewModel
@@ -33,8 +32,8 @@ class MainActivityViewModel @Inject constructor(
 ) : ViewModel() {
 
     val unfollowers: StateFlow<List<UserEntity>>
-    private val _uiState = MutableStateFlow<MainActivtyUiState>(MainActivtyUiState.Idle)
-    val uiState: StateFlow<MainActivtyUiState> = _uiState
+    private val _uiState = MutableStateFlow<MainActivityUiState>(MainActivityUiState.Idle)
+    val uiState: StateFlow<MainActivityUiState> = _uiState
 
     init {
         unfollowers = repository.unfollowers.stateIn(
@@ -46,7 +45,7 @@ class MainActivityViewModel @Inject constructor(
         viewModelScope.launch {
             repository.unfollowers.collect { users ->
                 if (users.isNotEmpty()) {
-                    _uiState.value = MainActivtyUiState.Success
+                    _uiState.value = MainActivityUiState.Success
                 }
             }
         }
@@ -54,7 +53,7 @@ class MainActivityViewModel @Inject constructor(
 
 
     fun processZipFile(context: Context, uri: Uri) {
-        _uiState.value = MainActivtyUiState.Loading
+        _uiState.value = MainActivityUiState.Loading
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -76,16 +75,16 @@ class MainActivityViewModel @Inject constructor(
                 }
 
                 if (followersJsonString == null || followingJsonString == null) {
-                    _uiState.value = MainActivtyUiState.Error("Could not find the file following.json or followers_1.json")
+                    _uiState.value = MainActivityUiState.Error("Could not find the file following.json or followers_1.json")
                     return@launch
                 }
 
                 repository.analyzeAndStoreUserData(followersJsonString!!, followingJsonString!!)
 
-                _uiState.value = MainActivtyUiState.Success
+                _uiState.value = MainActivityUiState.Success
 
             } catch (e: Exception) {
-                _uiState.value = MainActivtyUiState.Error("An error occurred while processing the file: ${e.message}")
+                _uiState.value = MainActivityUiState.Error("An error occurred while processing the file: ${e.message}")
             }
         }
     }
@@ -98,7 +97,7 @@ class MainActivityViewModel @Inject constructor(
     fun resetState() {
         viewModelScope.launch {
             repository.clearAllData()
-            _uiState.value = MainActivtyUiState.Idle
+            _uiState.value = MainActivityUiState.Idle
         }
     }
 }
