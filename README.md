@@ -3,6 +3,22 @@
 A lightweight Android app to help users find out **who unfollowed them on Instagram**.  
 The app works completely **offline** by analyzing the user's **Instagram data export**.
 
+
+## 🎥 Final Project Screenshots
+<table width="100%">
+<tr>
+<td align="center">
+<img src="screenshots/scaninsta1.jpg/250x500/ffffff/333333?text=Home+Screen" alt="Home Screen" width="250">
+<br><sub><b>Home Screen</b></sub>
+</td>
+<td align="center">
+<img src="screenshots/scaninsta2.jpg/250x500/ffffff/333333?text=Results+Screen" alt="Results Screen" width="250">
+<br><sub><b>Results Screen</b></sub>
+</td>
+</tr>
+</table>
+
+
 ## 🚧 Development Status
 
 This project is a work-in-progress. Expect frequent changes and new features coming soon.

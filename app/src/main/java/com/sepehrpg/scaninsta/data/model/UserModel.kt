@@ -21,5 +21,5 @@ data class InstagramUserData(
 data class InstagramUserInfo(
     val href: String,
     val value: String,
-    val timestamp: Long
+    val timestamp: Long,
 )

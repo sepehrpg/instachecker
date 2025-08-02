@@ -58,6 +58,8 @@ import com.sepehrpg.scaninsta.R
 fun AppCustomSearchBarBasicTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    onMenuClick: () -> Unit,
+    onFilterClick: () -> Unit,
     modifier: Modifier = Modifier.padding(vertical = 0.dp, horizontal = 0.dp),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -124,19 +126,19 @@ fun AppCustomSearchBarBasicTextField(
                         Row(verticalAlignment = Alignment.CenterVertically){
                             Icon(
                                 painter = painterResource(R.drawable.filter),
-                                contentDescription = "Close Icon",
+                                contentDescription = "Filter",
                                 tint = Color.Gray,
                                 modifier = Modifier.clickableWithNoRipple {
-
+                                    onFilterClick()
                                 }.size(22.dp)
                             )
                             Spacer(Modifier.width(15.dp))
                             Icon(
                                 painter = painterResource(R.drawable.menu),
-                                contentDescription = "Close Icon",
+                                contentDescription = "Menu",
                                 tint = Color.Gray,
                                 modifier = Modifier.clickableWithNoRipple {
-
+                                    onMenuClick()
                                 }.size(27.dp)
                             )
 
@@ -146,7 +148,6 @@ fun AppCustomSearchBarBasicTextField(
             }
         }
 ) {
-
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     BasicTextField(
@@ -209,6 +210,8 @@ private fun AppTextFieldPreview1() {
             AppCustomSearchBarBasicTextField(
                 value = text,
                 onValueChange = { text = it },
+                onMenuClick = {},
+                onFilterClick = {}
             )
         }
     }

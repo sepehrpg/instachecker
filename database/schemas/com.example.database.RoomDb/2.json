@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "ac9d909d19d6480fbe1002e315dbad2a",
+    "identityHash": "60578f3f70443b4197071c3c867efba6",
     "entities": [
       {
-        "tableName": "non_followers",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `href` TEXT, `value` TEXT, `timestamp` INTEGER, `isUnfollow` INTEGER NOT NULL)",
+        "tableName": "users",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT NOT NULL, `href` TEXT NOT NULL, `userType` TEXT NOT NULL, `pageId` INTEGER NOT NULL, FOREIGN KEY(`pageId`) REFERENCES `page`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -15,26 +15,26 @@
             "notNull": true
           },
           {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "href",
             "columnName": "href",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
-            "fieldPath": "value",
-            "columnName": "value",
+            "fieldPath": "userType",
+            "columnName": "userType",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "isUnfollow",
-            "columnName": "isUnfollow",
+            "fieldPath": "pageId",
+            "columnName": "pageId",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -45,14 +45,48 @@
             "id"
           ]
         },
-        "indices": [],
-        "foreignKeys": []
+        "foreignKeys": [
+          {
+            "table": "page",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "pageId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "page",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
       }
     ],
-    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac9d909d19d6480fbe1002e315dbad2a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '60578f3f70443b4197071c3c867efba6')"
     ]
   }
 }

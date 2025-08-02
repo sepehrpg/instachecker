@@ -3,7 +3,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import com.example.database.model.PageEntity
 import com.example.database.model.UserEntity
+import com.example.database.model.UserWithPage
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -11,12 +14,29 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUsers(users: List<UserEntity>)
 
-    @Query("DELETE FROM users WHERE userType = :userType")
-    suspend fun deleteUsersByType(userType: String)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPage(page: PageEntity): Long
 
-    @Query("SELECT * FROM users WHERE userType = 'UNFOLLOWER' ORDER BY username ASC")
-    fun getUnfollowers(): Flow<List<UserEntity>>
 
-    @Query("DELETE FROM users")
-    suspend fun clearAll()
+    @Query("SELECT * FROM users WHERE userType = 'UNFOLLOWER' AND pageId = :pageId")
+    fun getUnfollowersForPage(pageId: Int): Flow<List<UserEntity>>
+
+    @Query("SELECT MAX(id) FROM page")
+    fun getLatestPageId(): Flow<Int?>
+
+    @Query("SELECT * FROM page ORDER BY id DESC")
+    fun getAllPages(): Flow<List<PageEntity>>
+
+    @Query("DELETE FROM page WHERE id = :pageId")
+    suspend fun deletePageById(pageId: Int)
+
+    @Query("DELETE FROM page")
+    suspend fun clearAllPages()
+
+    @Transaction
+    @Query("SELECT * FROM users")
+    suspend fun getUsersWithPage(): List<UserWithPage>
+
+
+
 }
