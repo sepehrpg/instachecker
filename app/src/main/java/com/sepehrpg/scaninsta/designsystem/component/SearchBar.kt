@@ -81,7 +81,7 @@ fun AppCustomSearchBarBasicTextField(
     clearTextField: () -> Unit = {},
     placeholder: @Composable (() -> Unit)? = {
         Text(
-            text = "What are you craving?",
+            text = "Search",
             style = TextStyle(fontSize = 14.sp, color = Color(0xFFBDBDBD), textAlign = TextAlign.Center)
         )
     },
