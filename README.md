@@ -11,11 +11,6 @@ The app works completely **offline** by analyzing the user's **Instagram data ex
 </p>
 
 
-## 🚧 Development Status
-
-This project is a work-in-progress. Expect frequent changes and new features coming soon.
-
-
 ## 🔧 Features
 
 - Detect users you follow but who don't follow you back
