@@ -37,7 +37,8 @@ The app works completely **offline** by analyzing the user's **Instagram data ex
 - **MVVM architecture** – Modularized structure
 - **Room** – Local database storage
 - **Hilt** – Dependency Injection
-- **Kotlin** – Modern, expressive language for Android
+- **Gradle Version Catalog** – Centralized dependency management
+- **Custom Build Logic Plugin** – Reusable Gradle scripts for build configuration
 
 
 ## 🛡️ Privacy
