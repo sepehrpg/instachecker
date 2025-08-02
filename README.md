@@ -5,8 +5,10 @@ The app works completely **offline** by analyzing the user's **Instagram data ex
 
 
 ## 🎥 Final Project Screenshots
-![Screen 1](/screenshots/scaninsta1.jpg?raw=true)
-![Screen 2](/screenshots/scaninsta2.jpg?raw=true)
+<p align="center">
+  <img src="/screenshots/scaninsta1.jpg?raw=true" alt="Screen 1" width="300"/>
+  <img src="/screenshots/scaninsta2.jpg?raw=true" alt="Screen 2" width="300"/>
+</p>
 
 
 ## 🚧 Development Status
