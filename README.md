@@ -8,11 +8,11 @@ The app works completely **offline** by analyzing the user's **Instagram data ex
 <table width="100%">
 <tr>
 <td align="center">
-<img src="screenshots/scaninsta1.jpg/250x500/ffffff/333333?text=Home+Screen" alt="Home Screen" width="250">
+<img src="https://github.com/sepehrpg/instachecker/blob/v1/screenshots/scaninsta1.jpg/250x500/ffffff/333333?text=Home+Screen" alt="Home Screen" width="250">
 <br><sub><b>Home Screen</b></sub>
 </td>
 <td align="center">
-<img src="screenshots/scaninsta2.jpg/250x500/ffffff/333333?text=Results+Screen" alt="Results Screen" width="250">
+<img src="https://github.com/sepehrpg/instachecker/blob/v1/screenshots/scaninsta2.jpg/250x500/ffffff/333333?text=Results+Screen" alt="Results Screen" width="250">
 <br><sub><b>Results Screen</b></sub>
 </td>
 </tr>
