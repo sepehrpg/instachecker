@@ -1,30 +1,18 @@
 package com.sepehrpg.scaninsta.ui.screen
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -47,6 +35,7 @@ import com.sepehrpg.scaninsta.ui.MainActivityViewModel
 import com.sepehrpg.scaninsta.ui.sheets.FilterBottomSheet
 import com.sepehrpg.scaninsta.ui.sheets.HistoryBottomSheet
 import com.sepehrpg.scaninsta.ui.sheets.InstructionsBottomSheet
+import com.sepehrpg.scaninsta.ui.sheets.ImportSettingsBottomSheet
 import com.sepehrpg.scaninsta.ui.sheets.NewAnalysisBottomSheet
 import kotlinx.coroutines.launch
 
@@ -58,6 +47,7 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
     val unfollowers by viewModel.unfollowers.collectAsState()
     val allPages by viewModel.allPages.collectAsState()
     val sortOrder by viewModel.sortOrder.collectAsState()
+    val exportFileSettings by viewModel.exportFileSettings.collectAsState()
 
     val searchQuery by viewModel.searchQuery.collectAsState()
 
@@ -74,10 +64,13 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
     val instructionsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isInstructionsSheetOpen by remember { mutableStateOf(false) }
 
+    val importSettingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var isImportSettingsSheetOpen by remember { mutableStateOf(false) }
+
     val scope = rememberCoroutineScope()
 
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
             viewModel.processZipFile(context, it, pageName)
@@ -129,7 +122,8 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
                 when (state) {
                     is MainActivityUiState.Idle -> IdleScreen(
                         onSelectFile = { isNewAnalysisSheetOpen = true },
-                        onHelpClick = { isInstructionsSheetOpen = true }
+                        onHelpClick = { isInstructionsSheetOpen = true },
+                        onSettingsClick = { isImportSettingsSheetOpen = true },
                     )
                     is MainActivityUiState.Loading -> LoadingScreen()
                     is MainActivityUiState.Success -> ResultScreen(unfollowers = unfollowers)
@@ -144,7 +138,6 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
 
 
     if (isNewAnalysisSheetOpen) {
-        var pageName by remember { mutableStateOf("") }
         NewAnalysisBottomSheet(
             sheetState = newAnalysisSheetState,
             pageName = pageName,
@@ -154,14 +147,19 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
                 scope.launch { newAnalysisSheetState.hide() }.invokeOnCompletion {
                     if (!newAnalysisSheetState.isVisible) {
                         isNewAnalysisSheetOpen = false
-                        filePickerLauncher.launch("application/zip")
+                        filePickerLauncher.launch(
+                            arrayOf(
+                                "application/zip",
+                                "application/x-zip-compressed",
+                                "application/octet-stream",
+                            ),
+                        )
                     }
                 }
             }
         )
     }
 
-    // Bottom Sheet for showing analysis history
     if (isHistorySheetOpen) {
         HistoryBottomSheet(
             sheetState = historySheetState,
@@ -170,10 +168,8 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
             onDeletePage = { pageId ->
                 viewModel.deletePage(pageId)
             },
-            // NEW: Pass the select page function
             onSelectPage = { pageId ->
                 viewModel.selectPage(pageId)
-                // Close the sheet after selection
                 scope.launch { historySheetState.hide() }.invokeOnCompletion {
                     isHistorySheetOpen = false
                 }
@@ -181,7 +177,6 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
         )
     }
 
-    // NEW: Bottom Sheet for filtering options
     if (isFilterSheetOpen) {
         FilterBottomSheet(
             sheetState = filterSheetState,
@@ -200,6 +195,16 @@ fun AppMainScreen(viewModel: MainActivityViewModel) {
         InstructionsBottomSheet(
             sheetState = instructionsSheetState,
             onDismiss = { isInstructionsSheetOpen = false }
+        )
+    }
+
+    if (isImportSettingsSheetOpen) {
+        ImportSettingsBottomSheet(
+            sheetState = importSettingsSheetState,
+            settings = exportFileSettings,
+            onDismiss = { isImportSettingsSheetOpen = false },
+            onSave = viewModel::updateExportFileSettings,
+            onReset = viewModel::resetExportFileSettings,
         )
     }
 }

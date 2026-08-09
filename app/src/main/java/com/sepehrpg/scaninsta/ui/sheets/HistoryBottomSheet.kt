@@ -61,13 +61,16 @@ fun HistoryBottomSheet(
             }
 
             if (pages.isEmpty()) {
-                // ...
+                Text(
+                    "No saved analyses yet.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(pages, key = { it.id }) { page ->
-                        // NEW: The entire row is now clickable
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

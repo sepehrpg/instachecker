@@ -35,8 +35,12 @@ import com.sepehrpg.scaninsta.ui.common.FileUploadButton
 
 
 @Composable
-fun IdleScreen(onSelectFile: () -> Unit, onHelpClick: () -> Unit) {
-    val supportUrl = "http://sepehrpg.ir"
+fun IdleScreen(
+    onSelectFile: () -> Unit,
+    onHelpClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+) {
+    val supportUrl = "https://sepehrpg.ir"
     val uriHandler = LocalUriHandler.current
 
     Column(
@@ -83,6 +87,14 @@ fun IdleScreen(onSelectFile: () -> Unit, onHelpClick: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium
             )
 
+        }
+
+        TextButton(onClick = onSettingsClick) {
+            Text(
+                text = "Import settings",
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
 
         Box(

@@ -1,4 +1,5 @@
 package com.example.database.dao
+
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -17,6 +18,13 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPage(page: PageEntity): Long
 
+    /** Stores one complete analysis atomically so a failed import cannot leave an empty page. */
+    @Transaction
+    suspend fun insertAnalysis(page: PageEntity, users: List<UserEntity>): Long {
+        val pageId = insertPage(page)
+        insertUsers(users.map { it.copy(pageId = pageId.toInt()) })
+        return pageId
+    }
 
     @Query("SELECT * FROM users WHERE userType = 'UNFOLLOWER' AND pageId = :pageId")
     fun getUnfollowersForPage(pageId: Int): Flow<List<UserEntity>>
@@ -36,7 +44,4 @@ interface UserDao {
     @Transaction
     @Query("SELECT * FROM users")
     suspend fun getUsersWithPage(): List<UserWithPage>
-
-
-
 }

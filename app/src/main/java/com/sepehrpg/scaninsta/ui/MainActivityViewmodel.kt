@@ -1,30 +1,32 @@
 package com.sepehrpg.scaninsta.ui
+
 import android.content.Context
 import android.net.Uri
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.util.zip.ZipInputStream
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.database.model.PageEntity
 import com.example.database.model.UserEntity
+import com.sepehrpg.scaninsta.data.importer.ExportFileSettings
+import com.sepehrpg.scaninsta.data.importer.ExportFileSettingsStore
+import com.sepehrpg.scaninsta.data.importer.InstagramExportImporter
 import com.sepehrpg.scaninsta.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class SortOrder {
-    ASC, // Ascending A-Z
-    DESC // Descending Z-A
+    ASC,
+    DESC,
 }
 
 sealed class MainActivityUiState {
@@ -36,7 +38,9 @@ sealed class MainActivityUiState {
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val exportImporter: InstagramExportImporter,
+    private val exportFileSettingsStore: ExportFileSettingsStore,
 ) : ViewModel() {
 
     private val _selectedPageId = MutableStateFlow<Int?>(null)
@@ -46,6 +50,7 @@ class MainActivityViewModel @Inject constructor(
     val searchQuery: StateFlow<String> = _searchQuery
 
     val sortOrder: StateFlow<SortOrder> = _sortOrder
+    val exportFileSettings: StateFlow<ExportFileSettings> = exportFileSettingsStore.settings
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val unfollowers: StateFlow<List<UserEntity>> = _selectedPageId.flatMapLatest { pageId ->
@@ -55,19 +60,16 @@ class MainActivityViewModel @Inject constructor(
             flowOf(emptyList())
         }
     }
-        // Combine with sort order first
         .combine(_sortOrder) { list, order ->
             when (order) {
                 SortOrder.ASC -> list.sortedBy { it.username.lowercase() }
                 SortOrder.DESC -> list.sortedByDescending { it.username.lowercase() }
             }
         }
-        // THEN, combine the sorted list with the search query to filter it
         .combine(_searchQuery) { sortedList, query ->
             if (query.isBlank()) {
-                sortedList // If query is blank, return the full sorted list
+                sortedList
             } else {
-                // Otherwise, filter the list based on the query
                 sortedList.filter { user ->
                     user.username.contains(query, ignoreCase = true)
                 }
@@ -76,7 +78,7 @@ class MainActivityViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = emptyList(),
         )
 
     val allPages: StateFlow<List<PageEntity>>
@@ -87,7 +89,7 @@ class MainActivityViewModel @Inject constructor(
         allPages = repository.allPages.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = emptyList(),
         )
 
         viewModelScope.launch {
@@ -104,7 +106,6 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    // NEW: Function to be called from the UI when the search text changes
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
     }
@@ -113,40 +114,22 @@ class MainActivityViewModel @Inject constructor(
         _sortOrder.value = order
     }
 
-    // ... (The rest of your ViewModel functions remain unchanged)
     fun processZipFile(context: Context, uri: Uri, pageName: String) {
         _uiState.value = MainActivityUiState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                var followersJsonString: String? = null
-                var followingJsonString: String? = null
-
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    ZipInputStream(inputStream).use { zipInputStream ->
-                        var entry = zipInputStream.nextEntry
-                        while (entry != null) {
-                            when {
-                                entry.name.endsWith("followers_1.json") -> followersJsonString = readZipEntry(zipInputStream)
-                                entry.name.endsWith("following.json") -> followingJsonString = readZipEntry(zipInputStream)
-                            }
-                            entry = zipInputStream.nextEntry
-                        }
-                    }
-                }
-
-                if (followersJsonString == null || followingJsonString == null) {
-                    _uiState.value =
-                        MainActivityUiState.Error("Could not find the file following.json or followers_1.json")
-                    return@launch
-                }
-
-                val newPageId = repository.analyzeAndStoreUserData(followersJsonString!!, followingJsonString!!, pageName)
+                val export = context.contentResolver.openInputStream(uri)?.use { input ->
+                    exportImporter.importZip(input, exportFileSettings.value)
+                } ?: error("The selected file could not be opened.")
+                val analysisName = pageName.trim().ifBlank { "Instagram export" }
+                val newPageId = repository.analyzeAndStoreUserData(export, analysisName)
                 selectPage(newPageId)
                 _uiState.value = MainActivityUiState.Success
-
-            } catch (e: Exception) {
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
                 _uiState.value =
-                    MainActivityUiState.Error("An error occurred while processing the file: ${e.message}")
+                    MainActivityUiState.Error(exception.message ?: "The export could not be processed.")
             }
         }
     }
@@ -164,9 +147,12 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    private fun readZipEntry(zipInputStream: ZipInputStream): String {
-        val reader = BufferedReader(InputStreamReader(zipInputStream))
-        return reader.readText()
+    fun updateExportFileSettings(followersFileName: String, followingFileName: String) {
+        exportFileSettingsStore.update(followersFileName, followingFileName)
+    }
+
+    fun resetExportFileSettings() {
+        exportFileSettingsStore.reset()
     }
 
     fun resetState() {

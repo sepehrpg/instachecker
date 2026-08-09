@@ -42,7 +42,7 @@ fun InstructionsBottomSheet(
     onDismiss: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
-    val videoTutorialUrl = "https://github.com/sepehrpg/instachecker" // <--  TODO: Change this to your actual video URL
+    val projectUrl = "https://github.com/sepehrpg/instachecker"
 
     ModalBottomSheet(
         containerColor = Color.White,
@@ -71,33 +71,25 @@ fun InstructionsBottomSheet(
                     }
                 }
 
-                // NEW: Video Tutorial Link Button
                 item {
                     OutlinedButton(
-                        onClick = { uriHandler.openUri(videoTutorialUrl) },
+                        onClick = { uriHandler.openUri(projectUrl) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(painterResource(R.drawable.baseline_play_circle_outline_24), contentDescription = "Video Tutorial")
                         Spacer(Modifier.width(8.dp))
-                        Text("Watch Video Tutorial")
+                        Text("Open project guide")
                     }
                     Spacer(Modifier.height(24.dp))
                 }
 
-                // Step-by-step guide
                 item { InstructionStep("1", "Open the Instagram app and go to your **Profile**.") }
                 item { InstructionStep("2", "Tap the **☰ Menu** icon, then go to **Settings and Privacy** → **Accounts Centre**.") }
-                item { InstructionStep("3", "Select **Your information and permissions**, then **Download your information**.") }
-                item { InstructionStep("4", "Choose **Request a download**, select your profile, and tap **Next**.") }
+                item { InstructionStep("3", "Select **Your information and permissions**, then **Export your information**.") }
+                item { InstructionStep("4", "Choose **Create export**, select your profile, and export to your device.") }
                 item { InstructionStep("5", "Select the **\"Some of your information\"** option.") }
                 item { InstructionStep("6", "Scroll down and select ONLY **\"Followers and following\"**. -> Next -> Download to Device") }
-                item {
-                    InstructionStep(
-                        "7",
-                        "⚠️ **IMPORTANT**: Scroll to the bottom. In the format options, tap **HTML** and change the format to **JSON**.",
-                        isImportant = true
-                    )
-                }
+                item { InstructionStep("7", "Choose **JSON or HTML**. Both official export formats are supported.") }
                 item { InstructionStep("8", "Tap **Submit request**. It may take a few minutes for Instagram to prepare your file.") }
                 item { InstructionStep("9", "Once the `.zip` file is downloaded, return to this app and upload it.") }
             }
@@ -129,7 +121,7 @@ private fun InstructionStep(number: String, text: String, isImportant: Boolean =
             text = buildAnnotatedString {
                 val parts = text.split("**")
                 parts.forEachIndexed { index, part ->
-                    if (index % 2 == 1) { // Odd parts are bold
+                    if (index % 2 == 1) {
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append(part)
                         }

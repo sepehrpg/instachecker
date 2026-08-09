@@ -59,7 +59,7 @@ fun ResultScreen(unfollowers: List<UserEntity>) {
         if (unfollowers.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    "🎉 Great! No one has unfollowed you.",
+                    "🎉 Great! Everyone you follow also follows you back.",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -112,7 +112,7 @@ private fun UserItem(user: UserEntity,index: Int, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = "$index. ${user.username}",
+                text = "${index + 1}. ${user.username}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
