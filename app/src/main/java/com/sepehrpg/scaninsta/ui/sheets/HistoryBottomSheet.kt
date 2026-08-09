@@ -79,7 +79,7 @@ fun HistoryBottomSheet(
                             Text(
                                 text = page.name,
                                 modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge.copy(color = Color.DarkGray)
                             )
                             IconButton(onClick = {
                                 onDeletePage(page.id)
