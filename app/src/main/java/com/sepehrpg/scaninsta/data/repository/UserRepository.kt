@@ -4,49 +4,34 @@ import com.example.database.dao.UserDao
 import com.example.database.model.PageEntity
 import com.example.database.model.UserEntity
 import com.example.database.model.UserType
-import com.sepehrpg.scaninsta.data.model.FollowingWrapper
-import com.sepehrpg.scaninsta.data.model.InstagramUserData
-import com.sepehrpg.scaninsta.data.model.InstagramUserInfo
+import com.sepehrpg.scaninsta.data.importer.InstagramAccount
+import com.sepehrpg.scaninsta.data.importer.InstagramExportData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.json.Json
+import java.util.Locale
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(private val userDao: UserDao) {
-
-    private val json = Json { ignoreUnknownKeys = true }
-
-
     val allPages: Flow<List<PageEntity>> = userDao.getAllPages()
+    val latestPageId: Flow<Int?> = userDao.getLatestPageId()
 
     fun getUnfollowersForPage(pageId: Int): Flow<List<UserEntity>> {
         return userDao.getUnfollowersForPage(pageId)
     }
 
-    val latestPageId: Flow<Int?> = userDao.getLatestPageId()
-
-
-    suspend fun analyzeAndStoreUserData(followersJson: String, followingJson: String, pageName: String): Int {
-        val newPage = PageEntity(name = pageName)
-        val pageId = userDao.insertPage(newPage)
-
-        val followersList = json.decodeFromString<List<InstagramUserData>>(followersJson)
-        val followersEntities = followersList.mapNotNull { it.instagramUserInfo.firstOrNull() }
-            .map { it.toUserEntity(UserType.FOLLOWER, pageId.toInt()) }
-        userDao.insertUsers(followersEntities)
-
-        val followingWrapper = json.decodeFromString<FollowingWrapper>(followingJson)
-        val followingEntities = followingWrapper.relationshipsFollowing
-            .mapNotNull { it.instagramUserInfo.firstOrNull() }
-            .map { it.toUserEntity(UserType.FOLLOWING, pageId.toInt()) }
-        userDao.insertUsers(followingEntities)
-
-        val followersUsernames = followersEntities.map { it.username }.toSet()
+    suspend fun analyzeAndStoreUserData(export: InstagramExportData, pageName: String): Int {
+        val followersEntities = export.followers.map { it.toUserEntity(UserType.FOLLOWER) }
+        val followingEntities = export.following.map { it.toUserEntity(UserType.FOLLOWING) }
+        val followersUsernames = followersEntities
+            .map { it.username.lowercase(Locale.ROOT) }
+            .toSet()
         val unfollowersEntities = followingEntities
-            .filter { it.username !in followersUsernames }
+            .filter { it.username.lowercase(Locale.ROOT) !in followersUsernames }
             .map { it.copy(id = 0, userType = UserType.UNFOLLOWER) }
-        userDao.insertUsers(unfollowersEntities)
 
-        return pageId.toInt()
+        return userDao.insertAnalysis(
+            page = PageEntity(name = pageName),
+            users = followersEntities + followingEntities + unfollowersEntities,
+        ).toInt()
     }
 
     suspend fun deletePage(pageId: Int) {
@@ -54,11 +39,11 @@ class UserRepository @Inject constructor(private val userDao: UserDao) {
     }
 }
 
-private fun InstagramUserInfo.toUserEntity(type: UserType, pageId: Int): UserEntity {
+private fun InstagramAccount.toUserEntity(type: UserType): UserEntity {
     return UserEntity(
-        username = this.value,
-        href = this.href,
+        username = username,
+        href = profileUrl,
         userType = type,
-        pageId = pageId
+        pageId = 0,
     )
 }
